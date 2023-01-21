@@ -105,6 +105,7 @@ with open(file_name, "w") as file:
                 # Write the coordinates to the file
                 file.write(str(round(coord_cm[0],4)) + ',' + str(round(coord_cm[1],3)) + "\n")
                     
+                # If file exceeds the pre-defined size threshold, it will save and create a new one
                 if os.path.getsize("fish_coordinates_"+str(date_string) + ".txt") > file_size_threshold:
                     file.close()
                     start_time=time.time()
@@ -112,7 +113,8 @@ with open(file_name, "w") as file:
                     date_string = now.strftime("%Y-%m-%d_%H-%M-%S")
                     new_file = open("fish_coordinates_"+ str(date_string) + ".txt","w")
                     file=new_file
-
+                    
+        # If file exceeds the pre-defined time threshold, it will save and create a new one
         if time.time() - start_time > time_threshold:
             #Create new file with new name
             file.close()
