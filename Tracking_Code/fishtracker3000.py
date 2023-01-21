@@ -103,7 +103,7 @@ with open(file_name, "w") as file:
                 """ still buggy... """
 
                 # Write the coordinates to the file
-                file.write(str(round(coord_cm[0],4)) + ',' + str(round(coord_cm[1],3)) + "\n")
+                file.write(str(round(coord_cm[0],3)) + ',' + str(round(coord_cm[1],3)) + "\n")
                     
                 # If file exceeds the pre-defined size threshold, it will save and create a new one
                 if os.path.getsize("fish_coordinates_"+str(date_string) + ".txt") > file_size_threshold:
