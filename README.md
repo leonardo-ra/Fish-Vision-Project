@@ -1,3 +1,3 @@
-# Projeto Fixe : Tracking de peixes num aquário
+# Fish-Vision-Project: Integrated fish tracking in a small fish bowl
 
 #### A ser construido...
