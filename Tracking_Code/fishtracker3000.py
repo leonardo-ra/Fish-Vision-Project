@@ -203,4 +203,5 @@ with open(file_name, "w") as file:
             break
 
 cap.release()
+cap2.release()
 cv2.destroyAllWindows()
