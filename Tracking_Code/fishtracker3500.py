@@ -7,17 +7,27 @@ import csv
 
 # Create a VideoCapture object
 
-#Cam 1 (X,Z)
+# Cam 1 (X,Z)
 cap = cv2.VideoCapture(0)
 cap.set(3, 1280)
 cap.set(4, 720)
 h_aim = 720
 w_aim = 1280
 
-#Cam 2 (X,Y)
+# Cam 2 (Y,Z)
 cap2 = cv2.VideoCapture(2)
 cap2.set(3, 1280)
 cap2.set(4, 720)
+
+# Trigger to start recording
+trigger = False
+def start_recording():
+    global trigger
+    trigger = True
+
+# Wait for the trigger signal
+while not trigger:
+    time.sleep(0.1)
 
 # Conversion factor in px to centimeters
 px_cm=0.022570
@@ -59,8 +69,11 @@ tolerance = timedelta(seconds=0.2)
 
 # Open a file in write mode
 with open(file_name, "w",newline='') as csvfile:
-
+    
     while True:
+
+        # Starts the recording trigger for both cameras
+        start_recording()
 
         # Read a frame from the cameras
         ret, frame = cap.read()
@@ -116,17 +129,18 @@ with open(file_name, "w",newline='') as csvfile:
 
                 # Formatting
                 #formatted_coord_cm = tuple(round(num,2) for num in coord_cm)
+                """needs to be edited"""
 
                 # Print the coordinates on the terminal
                 #print(f"Coordinates in cm's (X,Z) = ({formatted_coord_cm[0]:.2f}, {formatted_coord_cm[1]:.2f})",end='',flush=True)
                 #print('\r')
+                """needs to be edited"""
 
 
                 # Print the coordinates on captured frame 
                 #coord_text = f"(x,z): {formatted_coord_cm[0]:.2f},{formatted_coord_cm[1]:.2f}"
                 #cv2.putText(roi,coord_text,(coord_px[0],coord_px[1]),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,0),1)        
                 """ still buggy... """
-
 
                 # Store the coordinates
                 xz.append(coord_cm)
@@ -169,15 +183,16 @@ with open(file_name, "w",newline='') as csvfile:
                 # Store the coordinates
                 yz.append(coord_cm2)
                 
+        writer = csv.writer(csvfile)
+        writer.writerow(['X','Y','Z','Timestamp'])
         for xz_pair in xz:
             for yz_pair in yz:
                 if abs(xz_pair[2] - yz_pair[2])<= tolerance:
-                    x, z, now = xz_pair
-                    y, _ = yz_pair
+                    x, z1, now = xz_pair
+                    y, z2 , _ = yz_pair
+                    z= (z1+z2)//2
                     xyz.append((x,y,z,now))
-                    writer = csv.writer(csvfile)
-                    writer.writerow(['X','Y','Z','Timestamp'])
-                    writer.writerow(xyz)
+                    writer.writerow(xyz[-1])
 
                     if os.path.getsize("fish_coordinates_"+str(date_string) + ".csv") > file_size_threshold:
                         csvfile.close()
