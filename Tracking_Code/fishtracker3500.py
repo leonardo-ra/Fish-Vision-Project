@@ -19,16 +19,6 @@ cap2 = cv2.VideoCapture(2)
 cap2.set(3, 1280)
 cap2.set(4, 720)
 
-# Trigger to start recording
-trigger = False
-def start_recording():
-    global trigger
-    trigger = True
-
-# Wait for the trigger signal
-while not trigger:
-    time.sleep(0.1)
-
 # Conversion factor in px to centimeters
 px_cm=0.022570
 
@@ -72,9 +62,6 @@ with open(file_name, "w",newline='') as csvfile:
     
     while True:
 
-        # Starts the recording trigger for both cameras
-        start_recording()
-
         # Read a frame from the cameras
         ret, frame = cap.read()
         ret2,frame2 = cap2.read()
@@ -112,9 +99,6 @@ with open(file_name, "w",newline='') as csvfile:
                 # Draw detection rectangles (green bounding boxes)
                 x_bound, z_bound, w_bound, h_bound = cv2.boundingRect(cnt)
                 cv2.rectangle(roi, (x_bound,z_bound), (x_bound + w_bound, z_bound + h_bound), (0,255,0), 2)
-
-                # Draw blue contours around the detected object
-                #cv2.drawContours(roi, [cnt], -1, (255,0,0),2)
                 
                 # Calculate the center point of the bounding box
                 center_x, center_z = x_bound + w_bound//2, z_bound + h_bound//2
@@ -125,7 +109,8 @@ with open(file_name, "w",newline='') as csvfile:
                 # Extract the center point of the bounding box as a coordinate on the bigger rectangle
                 coordinate_x, coordinate_z = center_x, big_rect_h - (center_z - big_rect_z)
                 coord_px = (coordinate_x,coordinate_z)
-                coord_cm = (coordinate_x*px_cm,coordinate_z*px_cm, now)
+                timestamp=time.time()-start_time
+                coord_cm = (coordinate_x*px_cm,coordinate_z*px_cm, timestamp)
 
                 # Formatting
                 #formatted_coord_cm = tuple(round(num,2) for num in coord_cm)
@@ -166,19 +151,8 @@ with open(file_name, "w",newline='') as csvfile:
                 # Extract the center point of the bounding box as a coordinate on the bigger rectangle
                 coordinate_y,coordinate_z = (-center_y + big_rect_w), big_rect_h - (center_z - big_rect_z) 
                 coord_px2 = (coordinate_y,coordinate_z)
-                coord_cm2 = (coordinate_y*px_cm,coordinate_z*px_cm, now)
-
-                # Formatting
-                #formatted_coord_cm2 = tuple(round(num,2) for num in coord_cm2)
-
-                # Print the coordinates on the terminal
-                #print(f"Coordinates in cm's (X,Y) = ({formatted_coord_cm2[0]:.2f},{formatted_coord_cm2[1]:.2f})",end='',flush=True)
-                #print('\r')
-
-                # Print the coordinates on captured frame
-                #coord_text2 = f"(x,y): {formatted_coord_cm2[0]:.2f},{formatted_coord_cm2[1]:.2f}"
-                #cv2.putText(roi2,coord_text2,(coord_px2[0],coord_px2[1]),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,0),1)
-                """ still buggy... """
+                timestamp=time.time()-start_time
+                coord_cm2 = (coordinate_y*px_cm,coordinate_z*px_cm, timestamp)
 
                 # Store the coordinates
                 yz.append(coord_cm2)
@@ -188,11 +162,27 @@ with open(file_name, "w",newline='') as csvfile:
         for xz_pair in xz:
             for yz_pair in yz:
                 if abs(xz_pair[2] - yz_pair[2])<= tolerance:
-                    x, z1, now = xz_pair
-                    y, z2 , _ = yz_pair
+                    x, z1, time1 = xz_pair
+                    y, z2 , time2 = yz_pair
                     z= (z1+z2)//2
-                    xyz.append((x,y,z,now))
+                    time_mark=(time1+time2)//2
+                    round(x,3)
+                    round(y,3)
+                    round(z,3)
+                    round(time_mark,4)
+                    xyz.append((x,y,z,time_mark))
                     writer.writerow(xyz[-1])
+        #            """migth need edit: with open('merged_coordinates.csv', 'w', newline='') as csvfile:
+        #                     writer = csv.writer(csvfile)
+        #                     writer.writerow(['X','Y','Z','Timestamp'])
+        #                     for xz_pair in xz:
+        #                         for yz_pair in yz:
+        #                             if abs(xz_pair[2] - yz_pair[2])<= tolerance:
+        #                                 x, z1, now = xz_pair
+        #                                 y, z2 , _ = yz_pair
+        #                                 z= (z1+z2)//2
+        #                                 xyz.append((x,y,z,now))
+        #                                 writer.writerow(xyz[-1])"""
 
                     if os.path.getsize("fish_coordinates_"+str(date_string) + ".csv") > file_size_threshold:
                         csvfile.close()
@@ -220,7 +210,6 @@ with open(file_name, "w",newline='') as csvfile:
 
         #cv2.imshow("mask 1", mask)
         #cv2.imshow("mask 2",mask2)
-       
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
