@@ -37,8 +37,8 @@ object_detector = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold
 object_detector2 = cv2.createBackgroundSubtractorMOG2(history= 100, varThreshold = 50) 
 
 # Define the time threshold and the file size threshold
-time_threshold = 300 # seconds
-file_size_threshold = 100000 # bytes
+time_threshold = 600 # seconds
+file_size_threshold = 1000000 # bytes
 
 # Get the current time
 start_time = time.time()
@@ -55,7 +55,7 @@ file_name = "fish_coordinates_" + date_string + ".csv"
 xz = []
 yz = []
 xyz = []
-tolerance = timedelta(seconds=0.2)
+tolerance = 0.5
 
 # Open a file in write mode
 with open(file_name, "w",newline='') as csvfile:
@@ -112,25 +112,8 @@ with open(file_name, "w",newline='') as csvfile:
                 timestamp=time.time()-start_time
                 coord_cm = (coordinate_x*px_cm,coordinate_z*px_cm, timestamp)
 
-                # Formatting
-                #formatted_coord_cm = tuple(round(num,2) for num in coord_cm)
-                """needs to be edited"""
-
-                # Print the coordinates on the terminal
-                #print(f"Coordinates in cm's (X,Z) = ({formatted_coord_cm[0]:.2f}, {formatted_coord_cm[1]:.2f})",end='',flush=True)
-                #print('\r')
-                """needs to be edited"""
-
-
-                # Print the coordinates on captured frame 
-                #coord_text = f"(x,z): {formatted_coord_cm[0]:.2f},{formatted_coord_cm[1]:.2f}"
-                #cv2.putText(roi,coord_text,(coord_px[0],coord_px[1]),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,0),1)        
-                """ still buggy... """
-
                 # Store the coordinates
                 xz.append(coord_cm)
-
-       
 
         #Side Camera (Y,Z)
         for cnt in contours2:    
@@ -157,32 +140,34 @@ with open(file_name, "w",newline='') as csvfile:
                 # Store the coordinates
                 yz.append(coord_cm2)
                 
-        writer = csv.writer(csvfile)
-        writer.writerow(['X','Y','Z','Timestamp'])
-        for xz_pair in xz:
-            for yz_pair in yz:
-                if abs(xz_pair[2] - yz_pair[2])<= tolerance:
-                    x, z1, time1 = xz_pair
-                    y, z2 , time2 = yz_pair
-                    z= (z1+z2)//2
-                    time_mark=(time1+time2)//2
-                    round(x,3)
-                    round(y,3)
-                    round(z,3)
-                    round(time_mark,4)
-                    xyz.append((x,y,z,time_mark))
-                    writer.writerow(xyz[-1])
-        #            """migth need edit: with open('merged_coordinates.csv', 'w', newline='') as csvfile:
-        #                     writer = csv.writer(csvfile)
-        #                     writer.writerow(['X','Y','Z','Timestamp'])
-        #                     for xz_pair in xz:
-        #                         for yz_pair in yz:
-        #                             if abs(xz_pair[2] - yz_pair[2])<= tolerance:
-        #                                 x, z1, now = xz_pair
-        #                                 y, z2 , _ = yz_pair
-        #                                 z= (z1+z2)//2
-        #                                 xyz.append((x,y,z,now))
-        #                                 writer.writerow(xyz[-1])"""
+        # Display processes 
+        cv2.imshow("Front RoI", roi)
+        cv2.imshow("Side RoI",roi2)
+
+        #cv2.imshow("Front view", frame)
+        #cv2.imshow("Side view",frame2)
+
+        #cv2.imshow("mask 1", mask)
+        #cv2.imshow("mask 2",mask2)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        
+    writer = csv.writer(csvfile)
+    #writer.writerow(['X','Y','Z','Timestamp'])
+    for xz_pair in xz:
+        for yz_pair in yz:
+            if abs(xz_pair[2] - yz_pair[2]) <= tolerance:
+                x, z1, time1 = xz_pair
+                y, z2 , time2 = yz_pair
+                z= (z1+z2)/2
+                x = round(x,3)
+                y = round(y,3)
+                z = round(z,3)
+                time1 = round(time1,3)
+                xyz.append((x,y,z,time1))
+                for row in xyz:
+                    writer.writerow(row)
 
                     if os.path.getsize("fish_coordinates_"+str(date_string) + ".csv") > file_size_threshold:
                         csvfile.close()
@@ -201,18 +186,6 @@ with open(file_name, "w",newline='') as csvfile:
                         new_file = open("fish_coordinates_"+ str(date_string) + ".csv","w")
                         csvfile = new_file
 
-        # Display processes 
-        cv2.imshow("Front RoI", roi)
-        cv2.imshow("Side RoI",roi2)
-
-        #cv2.imshow("Front view", frame)
-        #cv2.imshow("Side view",frame2)
-
-        #cv2.imshow("mask 1", mask)
-        #cv2.imshow("mask 2",mask2)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
 
 cap.release()
 cap2.release()
