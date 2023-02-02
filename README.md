@@ -25,5 +25,3 @@ The coordinates are gathered in pairs (X,Z and Y,Z), relative to the faces of th
 The two coordinate pairs (of each square plane) are merged based on the timestamp of when they were captured. If an object is detected on one of the planes, there is a small timeframe in which that same object can be detected on the second plane, for the system to consider it the same object and merge them together.
 
 The merging itself is done by calculating the average of the common axis between the two planes. Presently, this is the Z component between the two pairs of coordinates.
-
-## Future Work:
