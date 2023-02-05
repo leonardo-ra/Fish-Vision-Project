@@ -34,13 +34,15 @@ The merging itself is done by calculating the average of the common axis between
 - Step 1: Download/clone this repository
 - Step 2: Run the following line of code on your cmd/terminal:
 
-    pip install requirements.txt
+```
+pip install requirements.txt
+```
 
 - Step 3: Plug the webcams onto your PC's usb ports
 - Step 4: There are 2 versions of the code (720p and 360p), choose which one you want to run and type:
-
-    python3 Final_720pixeis.py
-
+```
+python3 Final_720pixeis.py
+```
 ### Future work that needs to be done:
 
 - Perform triangulation using both cameras:
