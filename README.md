@@ -30,19 +30,23 @@ The merging itself is done by calculating the average of the common axis between
 
 ### Instructions to run the program:
 
-- Step 0: Assuming you are using Windows on your machine
-- Step 1: Download/clone this repository
-- Step 2: Run the following line of code on your cmd/terminal:
+**Step 0** Assuming you are using a Windows distro on your machine, and you have python 3.10 installed
+**Step 1** Download the zip of this project or clone this repository
+**Step 2** Run the following line of code on your cmd/terminal, given that you are on the project's directory:
 
 ```
 pip install requirements.txt
 ```
 
-- Step 3: Plug the webcams onto your PC's usb ports
-- Step 4: There are 2 versions of the code (720p and 360p), choose which one you want to run and type:
+**Step 3:** Plug the two webcams into your PC's usb ports
+**Step 4:** There are 2 versions of the code (720p and 360p) inside the *Tracking_Code* directory, choose which one you want to run and type:
 ```
 python3 Final_720pixeis.py
 ```
+
+**Step 5:** The program runs, and once you press the 'q' key, it stores the recorded data onto a .csv file. That file can later be used in the matlab program, inside the *Matlab_Code* directory.
+
+
 ### Future work that needs to be done:
 
 - Perform triangulation using both cameras:
